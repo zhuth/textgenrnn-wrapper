@@ -1,0 +1,4 @@
+*.json
+*.hdf5
+models/
+data/
