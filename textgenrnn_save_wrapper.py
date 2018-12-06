@@ -96,7 +96,7 @@ if not num_epochs == 0:
 		# save results before training in case user aborts
 		save_dir = os.path.join('weights', save_name)
 		if not os.path.exists(save_dir):
-			os.mkdir(save_dir)
+			os.makedirs(save_dir)
 		files = ['textgenrnn_weights.hdf5', 'textgenrnn_vocab.json', 'textgenrnn_config.json']
 		for f in files:
 			shutil.copy(f, save_dir)
@@ -113,7 +113,7 @@ if not num_epochs == 0:
 	# save results again after training
 	save_dir = os.path.join('weights', save_name)
 	if not os.path.exists(save_dir):
-		os.mkdir(save_dir)
+		os.makedirs(save_dir)
 	files = ['textgenrnn_weights.hdf5', 'textgenrnn_vocab.json', 'textgenrnn_config.json']
 	for f in files:
 		shutil.copy(f, save_dir)
