@@ -66,12 +66,9 @@ if __name__ == '__main__':
                           max_gen_length=args.max_gen_length)
 
     else:
-        my_model = textgenrnn() if args.new_model or not os.path.exists(load_loc) else load_model(load_loc)
-
-        if not os.path.exists(save_loc):
-            os.makedirs(save_loc)
-
         try:
+            my_model = textgenrnn() if args.new_model or not os.path.exists(load_loc) else load_model(load_loc)
+
             if args.word_level:
                 print('Using word-level mode.')
                 my_model.train_from_file(data_loc, num_epochs=args.num_epochs, new_model=True, word_level=True,
@@ -85,6 +82,7 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             pass
 
-        files = ['textgenrnn_weights.hdf5', 'textgenrnn_vocab.json', 'textgenrnn_config.json']
-        for f in files:
+        if not os.path.exists(save_loc):
+            os.makedirs(save_loc)
+        for f in ['textgenrnn_weights.hdf5', 'textgenrnn_vocab.json', 'textgenrnn_config.json']:
             shutil.copy(f, save_loc)
