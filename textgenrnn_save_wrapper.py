@@ -18,6 +18,8 @@ def args_parser():
     parser.add_argument("--large_text", default=False,
                         help="Include to train in longtext mode instead of treating each line as a new item",
                         action="store_true")
+    parser.add_argument("--random_batch", type=int, default=0,
+                        help="Randomly choose a batch from the input text and train.")
     parser.add_argument("--word_level", default=False,
                         help="Include to train in word mode rather than character mode", action="store_true")
     parser.add_argument("--max_words", type=int, default=20000,
@@ -42,6 +44,12 @@ def load_model(load_loc):
         vocab_path=os.path.join(load_loc, 'textgenrnn_vocab.json'),
         config_path=os.path.join(load_loc, 'textgenrnn_config.json')
     )
+    
+    
+def random_choose(texts, size):
+    import random
+    random.shuffle(texts)
+    return texts[:size]
 
 
 if __name__ == '__main__':
@@ -67,18 +75,24 @@ if __name__ == '__main__':
 
     else:
         try:
-            my_model = textgenrnn() if args.new_model or not os.path.exists(load_loc) else load_model(load_loc)
+            args.new_model = args.new_model or not os.path.exists(load_loc)
+            my_model = textgenrnn() if args.new_model else load_model(load_loc)
 
             if args.word_level:
                 print('Using word-level mode.')
-                my_model.train_from_file(data_loc, num_epochs=args.num_epochs, new_model=True, word_level=True,
+                my_model.train_from_file(data_loc, num_epochs=args.num_epochs, new_model=args.new_model, word_level=True,
                                          max_words=args.max_words)
             elif args.large_text:
                 print('Using large-text mode.')
-                my_model.train_from_largetext_file(data_loc, num_epochs=args.num_epochs, new_model=True)
+                my_model.train_from_largetext_file(data_loc, num_epochs=args.num_epochs, new_model=args.new_model)
+            elif args.random_batch:
+                print('Using random batch mode.')
+                texts = open(data_loc, 'r', encoding='utf-8').readlines()
+                for i in range(args.num_epochs):
+                    my_model.train_on_texts(texts=random_choose(texts, args.random_batch), num_epochs=1, new_model=args.new_model)
             else:
                 print('Using normal text mode.')
-                my_model.train_from_file(data_loc, num_epochs=args.num_epochs, new_model=True)
+                my_model.train_from_file(data_loc, num_epochs=args.num_epochs, new_model=args.new_model)
         except KeyboardInterrupt:
             pass
 

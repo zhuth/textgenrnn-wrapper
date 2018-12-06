@@ -14,7 +14,7 @@ To train a new model from the text file in `'data/ice-cream/IceCream_sorted.txt'
 To sample from the model saved in weights/ice_cream:
 
 `python textgenrnn_save_wrapper.py --model_name=ice_cream`
-`python textgenrnn_save_wrapper.py --model_name=ice_cream --n_gen=10 --temperature=0.2`
+
 `python textgenrnn_save_wrapper.py --model_name=ice_cream --n_gen=10 --temperature=0.2 --prefix='Chocolate'`
 
 ## Continue training an already-trained model
@@ -55,3 +55,9 @@ train:
 Load from file:
 
 `python textgenrnn_save_wrapper.py --model_name=cocktails_largetext --temperature=0.5 --n_gen=1 --max_gen_length=1000`
+
+## Random batch mode:
+
+train:
+
+`python textgenrnn_save_wrapper.py --model_name=cocktails_largetext --random_batch=100 --new_model --num_epochs=10 --data_file='cocktails/many_cocktails.txt'`
