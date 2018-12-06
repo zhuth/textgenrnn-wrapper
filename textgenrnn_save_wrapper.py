@@ -3,7 +3,7 @@ import argparse
 from textgenrnn import textgenrnn
 
 
-def parser():
+def args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", required=True,
                         help="name of model & folder where it will be saved")
@@ -25,7 +25,7 @@ def parser():
     parser.add_argument("--save_name", default='',
                         help="Include to save the model in a new location when done. Otherwise, will save in "
                              "weights/model_name")
-    parser.add_argument("--n_gen", type=int, default=10,
+    parser.add_argument("--n_gen", type=int, default=1,
                         help="number of output samples to generate")
     parser.add_argument("--temperature", type=float, default=0.5,
                         help="temperature to use when generating samples")
@@ -37,11 +37,11 @@ def parser():
 
 
 def load_model(load_loc):
-    weights_loc = os.path.join(load_loc, 'textgenrnn_weights.hdf5')
-    vocab_loc = os.path.join(load_loc, 'textgenrnn_vocab.json')
-    config_loc = os.path.join(load_loc, 'textgenrnn_config.json')
-    my_model = textgenrnn(weights_path=weights_loc, vocab_path=vocab_loc, config_path=config_loc)
-    return my_model
+    return textgenrnn(
+        weights_path=os.path.join(load_loc, 'textgenrnn_weights.hdf5'),
+        vocab_path=os.path.join(load_loc, 'textgenrnn_vocab.json'),
+        config_path=os.path.join(load_loc, 'textgenrnn_config.json')
+    )
 
 
 if __name__ == '__main__':
@@ -51,15 +51,12 @@ if __name__ == '__main__':
     if not os.path.exists('data'):
         os.mkdir('data')
 
-    args = parser().parse_args()
-
-    if not args.model_name:
-        parser().print_help()
-        exit()
+    parser = args_parser()
+    args = parser.parse_args()
 
     load_loc = os.path.join('models', args.model_name)
-    data_loc = os.path.join('data', args.data_file)
-    save_loc = args.save_name if args.save_name else args.model_name
+    data_loc = os.path.join('data', args.data_file or '')
+    save_loc = os.path.join('models', args.save_name or args.model_name)
 
     if args.num_epochs == 0:  # sampling
         my_model = load_model(load_loc)
@@ -69,12 +66,10 @@ if __name__ == '__main__':
                           max_gen_length=args.max_gen_length)
 
     else:
-        # save results before training in case user aborts
-        save_dir = os.path.join('models', args.save_name)
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
+        my_model = textgenrnn() if args.new_model or not os.path.exists(load_loc) else load_model(load_loc)
 
-        my_model = textgenrnn() if args.new_model else load_model(load_loc)
+        if not os.path.exists(save_loc):
+            os.makedirs(save_loc)
 
         try:
             if args.word_level:
@@ -92,4 +87,4 @@ if __name__ == '__main__':
 
         files = ['textgenrnn_weights.hdf5', 'textgenrnn_vocab.json', 'textgenrnn_config.json']
         for f in files:
-            shutil.copy(f, save_dir)
+            shutil.copy(f, save_loc)
